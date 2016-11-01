@@ -10,20 +10,18 @@ class BoardsController < ApplicationController
   # GET /boards/1
   # GET /boards/1.json
   def show
-    @board_grid = []
-    @rows = @board.board_state.split('|') 
-    @rows.each { |row|
-      @board_grid.push(row.split('^'))
-    }
+    @board_grid = get_board  
   end
 
   # GET /boards/new
   def new
     @board = Board.new
+    @board.board_state = '0^0^0^0^0^0^0|0^0^0^0^0^0^0|0^0^0^0^0^0^0|0^0^0^0^0^0^0|0^0^0^0^0^0^0|0^0^0^0^0^0^0'
   end
 
   # GET /boards/1/edit
   def edit
+    @board_grid = get_board
   end
 
   # POST /boards
@@ -75,5 +73,14 @@ class BoardsController < ApplicationController
     # Never trust parameters from the scary internet, only allow the white list through.
     def board_params
       params.require(:board).permit(:board_state)
+    end
+    
+    def get_board
+        @board_grid = []
+        @rows = @board.board_state.split('|') 
+        @rows.each { |row|
+          @board_grid.push(row.split('^'))
+        }
+        return @board_grid
     end
 end

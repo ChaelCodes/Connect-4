@@ -1,0 +1,10 @@
+<strong>Board State</strong>
+<table class="board">
+<% for @row in @board_grid -%>
+  <tr>
+    <% for @position in @row -%>
+      <td><%= @position %></td>
+    <% end -%>
+  </tr>
+<% end -%>
+</table>
