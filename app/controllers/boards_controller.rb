@@ -1,5 +1,5 @@
 class BoardsController < ApplicationController
-  before_action :set_board, only: [:show, :edit, :update, :destroy]
+  before_action :set_board, only: [:show, :edit, :update, :destroy, :drop_token]
 
   # GET /boards
   # GET /boards.json
@@ -10,7 +10,7 @@ class BoardsController < ApplicationController
   # GET /boards/1
   # GET /boards/1.json
   def show
-    @board_grid = get_board  
+    @board_grid = get_board_state
   end
 
   # GET /boards/new
@@ -21,7 +21,7 @@ class BoardsController < ApplicationController
 
   # GET /boards/1/edit
   def edit
-    @board_grid = get_board
+    @board_grid = get_board_state
   end
 
   # POST /boards
@@ -39,7 +39,22 @@ class BoardsController < ApplicationController
       end
     end
   end
-
+  
+  # POST boards/drop_token
+  def drop_token
+    board_grid = get_board_state
+    board_grid[0][0] = 1
+    board_grid.collect! { |row|
+      row = row.join('^')
+    }
+    @board.board_state = board_grid.join('|')
+    @board.update(params.permit(:board_state))
+    respond_to do |format|
+      format.html { redirect_to @board, notice: 'Board was successfully updated.' }
+      format.json { render :show, status: :ok, location: @board }
+    end
+  end
+  
   # PATCH/PUT /boards/1
   # PATCH/PUT /boards/1.json
   def update
@@ -75,10 +90,11 @@ class BoardsController < ApplicationController
       params.require(:board).permit(:board_state)
     end
     
-    def get_board
+    #Get a 2D Array version of the board for display, and modification
+    def get_board_state
         @board_grid = []
-        @rows = @board.board_state.split('|') 
-        @rows.each { |row|
+        rows = @board.board_state.split('|') 
+        rows.each { |row|
           @board_grid.push(row.split('^'))
         }
         return @board_grid
