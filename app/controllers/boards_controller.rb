@@ -11,6 +11,7 @@ class BoardsController < ApplicationController
   # GET /boards/1.json
   def show
     @board_grid = get_board_state
+    @winner = has_connected_four_horizontally
   end
 
   # GET /boards/new
@@ -40,18 +41,22 @@ class BoardsController < ApplicationController
     end
   end
   
+  def make_best_move
+    drop_token({column: 1, player: 2})
+  end
+  
   # POST boards/drop_token
   def drop_token
     column = params[:column].to_i
+    player = params[:player].to_i
     board_grid = get_board_state
 
     (0...6).reverse_each { |i|
       if board_grid[i][column] == "0"
-        board_grid[i][column] = 1
+        board_grid[i][column] = player
         break
       end
     }
-    
     board_grid.collect! { |row|
       row = row.join('^')
     }
@@ -88,6 +93,17 @@ class BoardsController < ApplicationController
   end
 
   private
+    def has_connected_four_horizontally
+      board_grid = get_board_state
+      (0...6).each { |r| #row
+        (0...4).each { |c| #column
+          if (board_grid[r][c] == 1 and board_grid[r][c+1] == 1 and board_grid[r][c+2] == 1 and board_grid[r][c+3] == 1)
+            return true
+          end
+        }
+      }
+    end
+    
     # Use callbacks to share common setup or constraints between actions.
     def set_board
       @board = Board.find(params[:id])
