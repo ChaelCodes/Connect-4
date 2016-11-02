@@ -1,8 +1,12 @@
 <h2>Board State</h2>
 <table class="board">
-<tr>
-  <%= button_to "Drop", action: "drop_token" %>
-</tr>
+    <tr>
+        <% for i in 0...7 -%>
+            <th>
+              <%= button_to "Drop", action: "drop_token", column: i %>
+            </th>
+        <% end -%>
+    </tr>
 <% for @row in @board_grid -%>
   <tr>
     <% for @position in @row -%>

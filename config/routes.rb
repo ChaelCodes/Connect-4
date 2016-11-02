@@ -3,9 +3,6 @@ Rails.application.routes.draw do
   
   post 'boards/:id/drop_token' => 'boards#drop_token'
 
-  # Example of regular route:
-  #   get 'products/:id' => 'catalog#view'
-
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
 

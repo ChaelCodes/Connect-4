@@ -43,7 +43,8 @@ class BoardsController < ApplicationController
   # POST boards/drop_token
   def drop_token
     board_grid = get_board_state
-    board_grid[0][0] = 1
+    column = params[:column].to_i
+    board_grid[0][column] = 1
     board_grid.collect! { |row|
       row = row.join('^')
     }
