@@ -41,17 +41,25 @@ class BoardsController < ApplicationController
     end
   end
   
-  def make_best_move
-    player = params[:player]
-    drop_token({column: 1, player: player})
+  def make_best_move(player)
+    make_move(1, player)
   end
   
   # POST boards/drop_token
   def drop_token
     column = params[:column].to_i
     player = params[:player].to_i
+    make_move(column, player)
+    make_best_move(player + 1)
+    @board.update(params.permit(:board_state))
+    respond_to do |format|
+      format.html { redirect_to @board, notice: 'Board was successfully updated.' }
+      format.json { render :show, status: :ok, location: @board }
+    end
+  end
+  
+  def make_move(column, player)
     board_grid = get_board_state
-
     (0...6).reverse_each { |i|
       if board_grid[i][column] == "0"
         board_grid[i][column] = player
@@ -62,12 +70,6 @@ class BoardsController < ApplicationController
       row = row.join('^')
     }
     @board.board_state = board_grid.join('|')
-    @board.update(params.permit(:board_state))
-    respond_to do |format|
-      format.html { redirect_to @board, notice: 'Board was successfully updated.' }
-      format.json { render :show, status: :ok, location: @board }
-    end
-    change_turn player
   end
   
   # PATCH/PUT /boards/1
@@ -138,9 +140,9 @@ class BoardsController < ApplicationController
     end
     
     def change_turn(old_player)
-      player = @board.players[old_player + 1]
+      player = old_player + 1
       if player == 2
-        make_best_move 2
+        make_best_move(2)
       end
     end
     
