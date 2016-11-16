@@ -48,7 +48,10 @@ class BoardsController < ApplicationController
     player = params[:player]
     valid_move = make_move(column, player)
     if (valid_move)
-      make_best_move(2) unless has_player_won(player, @board.board_grid)
+      unless has_player_won(player, @board.board_grid)
+        move = find_best_move(2, @board.board_grid)
+        make_move(move[:column], 2)
+      end
       @board.update(params.permit(:board_state))
       respond_to do |format|
         format.html { redirect_to @board, notice: "Board was successfully updated" }
@@ -146,29 +149,45 @@ class BoardsController < ApplicationController
       @board.board_state = board_grid.join('|')
     end
  
-    def make_best_move(player)
+    def find_best_move(player, board_grid, depth=4)
       valid_moves = @board.find_valid_moves
+      if (depth == 0)
+        return { column: valid_moves[0][:column] }
+      end
       player = player.to_s
+      other_player = player == "1" ? "2" : "1"
       
       moves = []
       
       #Win or Lose Loop
       valid_moves.each { |move|
-        board_grid = @board.board_grid
+        hypothetical_board_grid = board_grid
         row = move[:row]
         column = move[:column]
-        board_grid[row][column] = player
+        hypothetical_board_grid[row][column] = player
         if (has_player_won(player, board_grid))
-          make_move(column, player)
-          return
+          return {column: column, outcome: 'Victory'}
         end
-        board_grid[row][column] = "1"
-        if (has_player_won(1, board_grid))
+        hypothetical_board_grid[row][column] = other_player
+        if (has_player_won(other_player, hypothetical_board_grid))
           moves << { row: row, column: column }
         end
       }
-      moves << valid_moves[0]
-      make_move(moves[0][:column], player) if moves[0]
+      
+      #Moves that allow my oponent to win
+      if (moves.length == 0)
+        valid_moves.each { |move|
+          hypothetical_board_grid = board_grid
+          row = move[:row]
+          column = move[:column]
+          hypothetical_board_grid[row][column] = player
+          hypothetical_move = find_best_move(other_player, hypothetical_board_grid, depth - 1)
+          if (hypothetical_move[:outcome] != 'Victory')
+            moves << { row: row, column: column }
+          end
+        }
+      end
+      return {column: moves[0][:column], outcome: 'Game Continues'}
     end
     
     # Use callbacks to share common setup or constraints between actions.
