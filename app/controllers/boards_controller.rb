@@ -147,9 +147,11 @@ class BoardsController < ApplicationController
  
     def make_best_move(player)
       valid_moves = @board.find_valid_moves
-      made_move = false
       player = player.to_s
-
+      
+      moves = []
+      
+      #Win or Lose Loop
       valid_moves.each { |move|
         board_grid = @board.board_grid
         row = move[:row]
@@ -157,10 +159,15 @@ class BoardsController < ApplicationController
         board_grid[row][column] = player
         if (has_player_won(player, board_grid))
           make_move(column, player)
-          made_move = true
+          return
+        end
+        board_grid[row][column] = "1"
+        if (has_player_won(1, board_grid))
+          moves << { row: row, column: column }
         end
       }
-      make_move(valid_moves[0][:column], player) unless made_move
+      make_move(moves[0][:column], player) if moves[0]
+      make_move(valid_moves[0][:column], player)
     end
     
     # Use callbacks to share common setup or constraints between actions.
