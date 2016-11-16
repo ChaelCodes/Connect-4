@@ -1,15 +1,33 @@
 // Place all the styles related to the Boards controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.description {
+    max-width: 500px;
+}
 .board {
     border-collapse: collapse;
     
     td {
-        border: 5px solid blue;
+        border: 8px solid blue;
     }
     
     td {
         width: 40px;
         height: 40px;
     }
+    
+    .player {
+        border-radius: 40px;
+        width: 40px;
+        height: 40px;
+        
+        &.player1 {
+            background: red;
+        }
+        
+        &.player2 {
+            background: yellow;
+        }
+    }
+
 }

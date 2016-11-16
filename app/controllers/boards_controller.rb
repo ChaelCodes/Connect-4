@@ -12,6 +12,7 @@ class BoardsController < ApplicationController
   def show
     @board_grid = @board.board_grid
     @winner = has_player_won(1, @board_grid)
+    @loser = has_player_won(2, @board_grid)
   end
 
   # GET /boards/new
