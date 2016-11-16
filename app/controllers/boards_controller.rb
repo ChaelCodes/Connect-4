@@ -167,8 +167,8 @@ class BoardsController < ApplicationController
           moves << { row: row, column: column }
         end
       }
+      moves << valid_moves[0]
       make_move(moves[0][:column], player) if moves[0]
-      make_move(valid_moves[0][:column], player)
     end
     
     # Use callbacks to share common setup or constraints between actions.
