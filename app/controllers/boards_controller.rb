@@ -41,10 +41,6 @@ class BoardsController < ApplicationController
     end
   end
   
-  def make_best_move(player)
-    make_move(1, player)
-  end
-  
   # POST boards/drop_token
   def drop_token
     column = params[:column].to_i
@@ -56,20 +52,6 @@ class BoardsController < ApplicationController
       format.html { redirect_to @board, notice: 'Board was successfully updated.' }
       format.json { render :show, status: :ok, location: @board }
     end
-  end
-  
-  def make_move(column, player)
-    board_grid = get_board_state
-    (0...6).reverse_each { |i|
-      if board_grid[i][column] == "0"
-        board_grid[i][column] = player
-        break
-      end
-    }
-    board_grid.collect! { |row|
-      row = row.join('^')
-    }
-    @board.board_state = board_grid.join('|')
   end
   
   # PATCH/PUT /boards/1
@@ -101,6 +83,7 @@ class BoardsController < ApplicationController
       return has_connected_four_horizontally(1) || has_connected_four_vertically(1) || has_connected_four_diagonally(1)
     end
 
+    #This is repetetive, and hideous, but I feel pressured to return results soon.
     def has_connected_four_horizontally(player)
       player = player.to_s
       board_grid = get_board_state
@@ -124,9 +107,10 @@ class BoardsController < ApplicationController
           end
         }
       }
+      return false
     end
     
-    def has_connected_four_diagonally
+    def has_connected_four_diagonally(player)
       board_grid = get_board_state
       (0...6).each { |r| #row
         (0...7).each { |c| #column
@@ -137,12 +121,42 @@ class BoardsController < ApplicationController
           end
         }
       }
+      return false
     end
     
-    def change_turn(old_player)
-      player = old_player + 1
-      if player == 2
-        make_best_move(2)
+    def will_connect_four_horizontally(player)
+      player = player.to_s
+      board_grid = get_board_state
+      (0...6).each { |r| #row
+        (0...4).each { |c| #column
+          if (board_grid[r][c+1] == player and board_grid[r][c+2] == player and board_grid[r][c+3] == player and (r == 0 or board_grid[r-1][c] != 0))
+            return { row: r, column: c }
+          end
+        }
+      }
+      return false
+    end
+    
+    def make_move(column, player)
+      board_grid = get_board_state
+      (0...6).reverse_each { |i|
+        if board_grid[i][column] == "0"
+          board_grid[i][column] = player
+          break
+        end
+      }
+      board_grid.collect! { |row|
+        row = row.join('^')
+      }
+      @board.board_state = board_grid.join('|')
+    end
+      
+    def make_best_move(player)
+      horizontal_threat = will_connect_four_horizontally(1)
+      if (horizontal_threat)
+        make_move(horizontal_threat[:column], player)
+      else
+        make_move(1, player)
       end
     end
     
