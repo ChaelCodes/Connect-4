@@ -1,6 +1,6 @@
 class BoardsController < ApplicationController
   before_action :set_board, only: [:show, :edit, :update, :destroy, :drop_token]
-
+  
   # GET /boards
   # GET /boards.json
   def index
@@ -11,7 +11,7 @@ class BoardsController < ApplicationController
   # GET /boards/1.json
   def show
     @board_grid = get_board_state
-    @winner = has_connected_four_horizontally
+    @winner = has_player_won
   end
 
   # GET /boards/new
@@ -42,7 +42,8 @@ class BoardsController < ApplicationController
   end
   
   def make_best_move
-    drop_token({column: 1, player: 2})
+    player = params[:player]
+    drop_token({column: 1, player: player})
   end
   
   # POST boards/drop_token
@@ -66,6 +67,7 @@ class BoardsController < ApplicationController
       format.html { redirect_to @board, notice: 'Board was successfully updated.' }
       format.json { render :show, status: :ok, location: @board }
     end
+    change_turn player
   end
   
   # PATCH/PUT /boards/1
@@ -93,15 +95,53 @@ class BoardsController < ApplicationController
   end
 
   private
-    def has_connected_four_horizontally
+    def has_player_won
+      return has_connected_four_horizontally(1) || has_connected_four_vertically(1) || has_connected_four_diagonally(1)
+    end
+
+    def has_connected_four_horizontally(player)
+      player = player.to_s
       board_grid = get_board_state
       (0...6).each { |r| #row
         (0...4).each { |c| #column
-          if (board_grid[r][c] == 1 and board_grid[r][c+1] == 1 and board_grid[r][c+2] == 1 and board_grid[r][c+3] == 1)
+          if (board_grid[r][c] == player and board_grid[r][c+1] == player and board_grid[r][c+2] == player and board_grid[r][c+3] == player)
             return true
           end
         }
       }
+      return false
+    end
+    
+    def has_connected_four_vertically(player)
+      player = player.to_s
+      board_grid = get_board_state
+      (0...3).each { |r| #row
+        (0...7).each { |c| #column
+          if (board_grid[r][c] == player and board_grid[r+1][c] == player and board_grid[r+2][c] == player and board_grid[r+3][c] == player)
+            return true
+          end
+        }
+      }
+    end
+    
+    def has_connected_four_diagonally
+      board_grid = get_board_state
+      (0...6).each { |r| #row
+        (0...7).each { |c| #column
+          if board_grid[r][c] == player and board_grid[r+1][c+1] == player and board_grid[r+2][c+2] == player and board_grid[r+3][c+3] == player
+            return true
+          elsif board_grid[r][c] == player and board_grid[r-1][c-1] == player and board_grid[r-2][c-2] == player and board_grid[r-3][c-3] == player
+            return true
+          end
+        }
+      }
+    end
+    
+    def change_turn(old_player)
+      player = @board.players[old_player + 1]
+      if player == 2
+        make_best_move 2
+      end
     end
     
     # Use callbacks to share common setup or constraints between actions.
