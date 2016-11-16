@@ -2,13 +2,16 @@
 <% if @winner %>
 <h1>You have won!!</h1>
 <% end %>
+<div><%= @move %></div>
 <table class="board">
     <tr>
+      <% unless @winner %>
         <% for i in 0..@board_grid.length %>
             <th>
               <%= button_to "Drop", action: "drop_token", column: i, player: 1 %>
             </th>
-        <% end -%>
+        <% end %>
+      <% end %>
     </tr>
 <% for @row in @board_grid %>
   <tr>
