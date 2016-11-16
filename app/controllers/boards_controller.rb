@@ -128,9 +128,9 @@ class BoardsController < ApplicationController
           end
         }
       }
-      (3...6).each { |r| #row
+      (2...6).each { |r| #row
         (0...4).each { |c| #column
-          if board_grid[r][c] == player and board_grid[r-1][c-1] == player and board_grid[r-2][c-2] == player and board_grid[r-3][c-3] == player
+          if board_grid[r][c] == player and board_grid[r-1][c+1] == player and board_grid[r-2][c+2] == player and board_grid[r-3][c+3] == player
                 return true
           end
         }
