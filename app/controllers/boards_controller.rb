@@ -165,7 +165,7 @@ class BoardsController < ApplicationController
         row = move[:row]
         column = move[:column]
         hypothetical_board_grid[row][column] = player
-        if (has_player_won(player, board_grid))
+        if (has_player_won(player, hypothetical_board_grid))
           return {column: column, outcome: 'Victory'}
         end
         hypothetical_board_grid[row][column] = other_player
@@ -175,7 +175,7 @@ class BoardsController < ApplicationController
       }
       
       #Moves that allow my oponent to win
-      if (moves.length == 0)
+      if (moves.size < 1)
         valid_moves.each { |move|
           hypothetical_board_grid = board_grid
           row = move[:row]
